@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/cotap/siren",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/cloudfoundry/gosigar",
+			"Comment": "scotty_09012012-31-gdfaa4d4",
+			"Rev": "dfaa4d491586af21e1ce06028df3926389a99654"
+		}
+	]
+}
