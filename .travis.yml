@@ -1,0 +1,11 @@
+language: go
+go: 1.8
+script: make build
+deploy:
+  provider: releases
+  api_key:
+    secure: BI6EogrYaCyhiPC4P52xDKtOhUP4pgHHpsjCvY5ym+Nobn5zfE6GrWi/JXrwaB+DFwf6O92Qm6JHSTRHZB7L4dVRv+K0m4H0WrPHaHFakw5wCzSAbE9v5Uxf0cPCCQx/g5ew8DGr+6mB9rTkq3DMXosjf422pKswPZSnNv0ZqxYj0W/DB4sjQuZ4K4kz4ZZ82ge1EXbkwn1yNP4f4cOcFUgV6Sk30JL/cuNoUqw3uxoTEswDs/TLHeFe/WxZUONLhwb2p5Sa8haP9tlMJXfcAobv0Zmm1CZpOz+SJN0Q4rqc+DaT/PpSQ8iRvFeW7M+z7bZu+84D7/cekx9W82DnG9qKIrxk7QW4G0+P7A1oHcLhnedK1hJwDf16aK0zZ1MEUWez174IjhDDguQyvshtHKT4eVQfh7ancnzsS/GZfrbXyJ9hHTdzP8+6pu5Ji8MmWTNxuxIPOBc6EFBAqlbnVmWgvMFTYf6vjOZAX6lkeKovfXg2SoHhxMIgSMatcKyUNRGpfmGtrBZC4p2gtgXPhICIwuJn8fYUkeKTpgGl7HA74gI5Okrw6MmlPSV/GtPBiNdGu0KiDrp4xZuwpi9jEjzVD6559xNo6jmyE1JrM+jw4R99n81fSKjR9YGY3XIx4kw9IUicM/soX6NVzQHi+0WTi+jl7Pb3R1RckGhC/6Q=
+  file: bin/siren
+  skip_cleanup: true
+  on:
+    tags: true
