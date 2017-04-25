@@ -33,11 +33,11 @@ exit status 2
 ### Disk
 
 ```bash
-$ siren disk 70 90
-Filesystem      Size Used Avail Use% Mounted on      Status
-/dev/disk1      465G 339G  126G  73% /               WARN
-devfs           207K 207K    0    0% /dev            OK
-exit status 1
+$ siren disk 15 20
+Status     Filesystem      Size Used Avail Use% Mounted on
+FAIL       /dev/disk1      465G 339G  126G  73% /
+OK         devfs           207K 207K    0    0% /dev
+exit status 2
 ```
 
 ### Load

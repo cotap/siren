@@ -138,7 +138,7 @@ func mem(w, f int) Status {
 	return ok
 }
 
-const output_format = "%-15s %4s %4s %5s %4s %-15s %-5s\n"
+const diskFormat = "%-10s %-15s %4s %4s %5s %4s %-15s\n"
 
 func formatSize(size uint64) string {
 	return sigar.FormatSize(size * 1024)
@@ -149,8 +149,8 @@ func disk(w, f int) Status {
 
 	fslist := sigar.FileSystemList{}
 	fslist.Get()
-	fmt.Fprintf(os.Stdout, output_format,
-		"Filesystem", "Size", "Used", "Avail", "Use%", "Mounted on", "Status")
+	fmt.Fprintf(os.Stdout, diskFormat,
+		"Status", "Filesystem", "Size", "Used", "Avail", "Use%", "Mounted on")
 
 	for _, fs := range fslist.List {
 		status := ok
@@ -166,14 +166,14 @@ func disk(w, f int) Status {
 			status = fail
 		}
 
-		fmt.Fprintf(os.Stdout, output_format,
+		fmt.Fprintf(os.Stdout, diskFormat,
+			status,
 			fs.DevName,
 			formatSize(usage.Total),
 			formatSize(usage.Used),
 			formatSize(usage.Avail),
 			sigar.FormatPercent(usage.UsePercent()),
-			dirDame,
-			status)
+			dirDame)
 
 		if status > s {
 			s = status
