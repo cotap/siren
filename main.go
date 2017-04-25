@@ -10,6 +10,17 @@ import (
 
 type Status int
 
+func (s Status) String() string {
+	switch s {
+	case ok:
+		return "OK"
+	case warn:
+		return "WARN"
+	default:
+		return "FAIL"
+	}
+}
+
 const (
 	ok Status = iota
 	warn
@@ -52,14 +63,22 @@ func main() {
 func swap(w, f int) Status {
 	swap := sigar.Swap{}
 	swap.Get()
-	used := int(float64(swap.Used) / float64(swap.Total) * 100)
-	fmt.Fprintf(os.Stdout, "Swap usage: %d%%\n", used)
+	used := float64(swap.Used) / float64(swap.Total) * 100.0
 
-	if used >= f {
+	if used <= 0 {
+		fmt.Fprintf(os.Stdout, "No swap usage")
+		return ok
+	}
+
+	fmt.Fprintf(os.Stdout, "Swap usage: %0.2f%%\n", used)
+
+	if used >= float64(f) {
+		fmt.Fprintf(os.Stdout, "\n%s: swap usage exceeds threshold (%0.2f%% >= %d%%)\n", fail, used, f)
 		return fail
 	}
 
-	if used >= w {
+	if used >= float64(w) {
+		fmt.Fprintf(os.Stdout, "\n%s: swap usage exceeds threshold (%0.2f%% >= %d%%)\n", warn, used, w)
 		return warn
 	}
 
@@ -70,24 +89,30 @@ func load(w, f int) Status {
 	concreteSigar := sigar.ConcreteSigar{}
 	avg, err := concreteSigar.GetLoadAverage()
 	if err != nil {
-		fmt.Printf("Failed to get load average")
+		fmt.Fprintf(os.Stdout, "Failed to get load average")
 		return ok
 	}
 
 	cpus := sigar.CpuList{}
 	cpus.Get()
 
-	one := (avg.One / float64(len(cpus.List)))
-	five := (avg.Five / float64(len(cpus.List)))
-	fifteen := (avg.Fifteen / float64(len(cpus.List)))
+	numCPUs := len(cpus.List)
 
-	fmt.Printf("Load Average / CPUs: %f %f %f\n", one, five, fifteen)
+	one := (avg.One / float64(numCPUs)) * 100.0
+	five := (avg.Five / float64(numCPUs)) * 100.0
+	fifteen := (avg.Fifteen / float64(numCPUs)) * 100.0
 
-	if five >= float64(f)/100.0 {
+	fmt.Fprintf(os.Stdout, "CPUs: %d\n", numCPUs)
+	fmt.Fprintf(os.Stdout, "Load Averages: %0.3f %0.3f %0.3f\n", avg.One, avg.Five, avg.Fifteen)
+	fmt.Fprintf(os.Stdout, "Normalized Load: %0.2f%% %0.2f%% %0.2f%%\n", one, five, fifteen)
+
+	if five >= float64(f) {
+		fmt.Fprintf(os.Stdout, "\n%s: 5min normalized load exceeds threshold (%0.2f%% >= %d%%)\n", fail, five, f)
 		return fail
 	}
 
-	if five >= float64(w)/100.0 {
+	if five >= float64(w) {
+		fmt.Fprintf(os.Stdout, "\n%s: 5min normalized load exceeds threshold (%0.2f%% >= %d%%)\n", warn, five, w)
 		return warn
 	}
 
@@ -97,21 +122,23 @@ func load(w, f int) Status {
 func mem(w, f int) Status {
 	mem := sigar.Mem{}
 	mem.Get()
-	used := int(float64(mem.ActualUsed) / float64(mem.Total) * 100)
-	fmt.Fprintf(os.Stdout, "Memory usage: %d%%\n", used)
+	used := float64(mem.ActualUsed) / float64(mem.Total) * 100
+	fmt.Fprintf(os.Stdout, "Memory usage: %0.2f%%\n", used)
 
-	if used >= f {
+	if used >= float64(f) {
+		fmt.Fprintf(os.Stdout, "\n%s: memory usage exceeds threshold (%0.2f%% >= %d%%)\n", fail, used, f)
 		return fail
 	}
 
-	if used >= w {
+	if used >= float64(w) {
+		fmt.Fprintf(os.Stdout, "\n%s: memory usage exceeds threshold (%0.2f%% >= %d%%)\n", warn, used, w)
 		return warn
 	}
 
 	return ok
 }
 
-const output_format = "%-15s %4s %4s %5s %4s %-15s\n"
+const diskFormat = "%-10s %-15s %4s %4s %5s %4s %-15s\n"
 
 func formatSize(size uint64) string {
 	return sigar.FormatSize(size * 1024)
@@ -122,31 +149,36 @@ func disk(w, f int) Status {
 
 	fslist := sigar.FileSystemList{}
 	fslist.Get()
-	fmt.Fprintf(os.Stdout, output_format,
-		"Filesystem", "Size", "Used", "Avail", "Use%", "Mounted on")
+	fmt.Fprintf(os.Stdout, diskFormat,
+		"Status", "Filesystem", "Size", "Used", "Avail", "Use%", "Mounted on")
 
 	for _, fs := range fslist.List {
-		dir_name := fs.DirName
-
+		status := ok
+		dirDame := fs.DirName
 		usage := sigar.FileSystemUsage{}
+		usage.Get(dirDame)
 
-		usage.Get(dir_name)
+		if usage.UsePercent() >= float64(w) {
+			status = warn
+		}
 
-		fmt.Fprintf(os.Stdout, output_format,
+		if usage.UsePercent() >= float64(f) {
+			status = fail
+		}
+
+		fmt.Fprintf(os.Stdout, diskFormat,
+			status,
 			fs.DevName,
 			formatSize(usage.Total),
 			formatSize(usage.Used),
 			formatSize(usage.Avail),
 			sigar.FormatPercent(usage.UsePercent()),
-			dir_name)
+			dirDame)
 
-		if int(usage.UsePercent()) >= w && s < warn {
-			s = warn
+		if status > s {
+			s = status
 		}
 
-		if int(usage.UsePercent()) >= f {
-			s = fail
-		}
 	}
 
 	return s
