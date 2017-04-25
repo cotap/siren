@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -27,23 +28,13 @@ const (
 	fail
 )
 
+const usage = "siren [mem|swap|disk|load|proc] ((WARN_LEVEL FAIL_LEVEL) | PID)"
+
 func main() {
-
-	if len(os.Args) != 4 {
-		fmt.Println("siren [mem|swap|disk|load] WARN_LEVEL FAIL_LEVEL")
-		return
-	}
-
-	cmd := os.Args[1]
-
-	w, err := strconv.Atoi(os.Args[2])
+	cmd, w, f, pid, err := parseArgs()
 	if err != nil {
-		fmt.Println("WARN_LEVEL must be an integer")
-	}
-
-	f, err := strconv.Atoi(os.Args[3])
-	if err != nil {
-		fmt.Println("FAIL_LEVEL must be an integer")
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 
 	switch cmd {
@@ -55,8 +46,10 @@ func main() {
 		os.Exit(int(disk(w, f)))
 	case "load":
 		os.Exit(int(load(w, f)))
+	case "proc":
+		os.Exit(int(proc(pid)))
 	default:
-		fmt.Println("One of the following commands: mem, swap, disk, load\n")
+		fmt.Println("One of the following commands: mem, swap, disk, load, proc\n")
 	}
 }
 
@@ -138,6 +131,21 @@ func mem(w, f int) Status {
 	return ok
 }
 
+func proc(pid int) Status {
+	list := sigar.ProcList{}
+	list.Get()
+
+	for p := range list.List {
+		if p == pid {
+			fmt.Fprintf(os.Stdout, "\n%s: process with PID %d is running\n", ok, pid)
+			return ok
+		}
+	}
+
+	fmt.Fprintf(os.Stdout, "\n%s: process with PID %d is NOT running\n", fail, pid)
+	return fail
+}
+
 const diskFormat = "%-10s %-15s %4s %4s %5s %4s %-15s\n"
 
 func formatSize(size uint64) string {
@@ -182,4 +190,39 @@ func disk(w, f int) Status {
 	}
 
 	return s
+}
+
+func parseArgs() (string, int, int, int, error) {
+	var (
+		cmd       string
+		w, f, pid int
+		err       error
+	)
+
+	if len(os.Args) < 3 {
+		return cmd, w, f, pid, errors.New(usage)
+	}
+
+	cmd = os.Args[1]
+
+	switch cmd {
+	case "mem", "swap", "disk", "load":
+		if len(os.Args) < 4 {
+			return cmd, w, f, pid, errors.New(usage)
+		}
+
+		w, err = strconv.Atoi(os.Args[2])
+		if err != nil {
+			err = errors.New("WARN_LEVEL must be an integer")
+		}
+
+		f, err = strconv.Atoi(os.Args[3])
+		if err != nil {
+			err = errors.New("FAIL_LEVEL must be an integer")
+		}
+	case "proc":
+		pid, err = strconv.Atoi(os.Args[2])
+	}
+
+	return cmd, w, f, pid, err
 }
