@@ -2,6 +2,7 @@ package siren
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"strconv"
@@ -24,6 +25,8 @@ func NTP(w, f int) Status {
 	}
 
 	fmt.Fprintf(os.Stdout, "NTP drift: %0.2fms\n", drift)
+
+	drift = math.Abs(drift)
 
 	if drift >= float64(f) {
 		fmt.Fprintf(os.Stdout, "\n%s: NTP drift exceeds threshold (%0.2fms >= %dms)\n", fail, drift, f)
