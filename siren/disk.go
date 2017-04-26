@@ -27,6 +27,10 @@ func Disk(w, f int) Status {
 		usage := sigar.FileSystemUsage{}
 		usage.Get(dirDame)
 
+		if usage.Used <= 0 || usage.Total <= 0 {
+			continue
+		}
+
 		if usage.UsePercent() >= float64(w) {
 			status = warn
 		}
