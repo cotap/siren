@@ -10,7 +10,7 @@ update:
 
 deps:
 	@which godep > /dev/null || go get github.com/tools/godep
-	@godep go install ./...
+	@godep restore
 
 format:
 	@which goimports > /dev/null || go get golang.org/x/tools/cmd/goimports
