@@ -9,7 +9,7 @@ import (
 	"github.com/cotap/siren/siren"
 )
 
-const usage = "siren [mem|swap|disk|load|proc] ((WARN_LEVEL FAIL_LEVEL) | PID)"
+const usage = "siren [mem|swap|disk|load|ntp|proc] ((WARN_LEVEL FAIL_LEVEL) | PID)"
 
 func main() {
 	cmd, w, f, pid, err := parseArgs()
@@ -27,10 +27,12 @@ func main() {
 		os.Exit(int(siren.Disk(w, f)))
 	case "load":
 		os.Exit(int(siren.Load(w, f)))
+	case "ntp":
+		os.Exit(int(siren.NTP(w, f)))
 	case "proc":
 		os.Exit(int(siren.Proc(pid)))
 	default:
-		fmt.Println("One of the following commands: mem, swap, disk, load, proc\n")
+		fmt.Println(usage)
 	}
 }
 
@@ -48,7 +50,7 @@ func parseArgs() (string, int, int, int, error) {
 	cmd = os.Args[1]
 
 	switch cmd {
-	case "mem", "swap", "disk", "load":
+	case "mem", "swap", "disk", "load", "ntp":
 		if len(os.Args) < 4 {
 			return cmd, w, f, pid, errors.New(usage)
 		}

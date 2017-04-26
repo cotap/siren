@@ -53,3 +53,15 @@ Normalized Load: 27.59% 24.63% 22.93%
 WARN: 5min normalized load exceeds threshold (24.63% >= 20%)
 exit status 1
 ```
+
+### NTP Drift
+
+NTP takes WARN and FAIL arguments measured in milliseconds of drive.
+
+```bash
+$ siren ntp 40 100
+NTP drift: 72.06ms
+
+WARN: NTP drift exceeds threshold (72.06ms >= 40ms)
+exit status 1
+```
