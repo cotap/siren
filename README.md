@@ -56,7 +56,7 @@ exit status 1
 
 ### NTP Drift
 
-NTP takes WARN and FAIL arguments measured in milliseconds of drive.
+NTP takes WARN and FAIL arguments measured in milliseconds of drift.
 
 ```bash
 $ siren ntp 40 100
