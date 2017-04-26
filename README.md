@@ -65,3 +65,7 @@ NTP drift: 72.06ms
 WARN: NTP drift exceeds threshold (72.06ms >= 40ms)
 exit status 1
 ```
+
+## Credits
+
+Many thanks to the folks over at [Cloudfoundry](https://github.com/cloudfoundry) for open-sourcing their [Go Sigar port](https://github.com/cloudfoundry/gosigar) which this library relies upon!
