@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/cotap/siren/siren"
+
 )
 
 const usage = "siren [mem|swap|disk|load|ntp|proc] ((WARN_LEVEL FAIL_LEVEL) | PID)"
@@ -27,8 +28,8 @@ func main() {
 		os.Exit(int(siren.Disk(w, f)))
 	case "load":
 		os.Exit(int(siren.Load(w, f)))
-	case "ntp":
-		os.Exit(int(siren.NTP(w, f)))
+        case "ntp":
+                os.Exit(int(siren.NTP(w, f)))
 	case "proc":
 		os.Exit(int(siren.Proc(pid)))
 	default:
