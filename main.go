@@ -9,7 +9,7 @@ import (
 	"github.com/cotap/siren/siren"
 )
 
-const usage = "siren [mem|swap|disk|load|ntp|proc] ((WARN_LEVEL FAIL_LEVEL) | PID)"
+const usage = "siren [mem|swap|disk|load|chrony|proc] ((WARN_LEVEL FAIL_LEVEL) | PID)"
 
 func main() {
 	cmd, w, f, pid, err := parseArgs()
