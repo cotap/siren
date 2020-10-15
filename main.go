@@ -50,7 +50,7 @@ func parseArgs() (string, int, int, int, error) {
 	cmd = os.Args[1]
 
 	switch cmd {
-	case "mem", "swap", "disk", "load", "ntp":
+	case "mem", "swap", "disk", "load", "chrony":
 		if len(os.Args) < 4 {
 			return cmd, w, f, pid, errors.New(usage)
 		}
